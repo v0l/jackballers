@@ -1,0 +1,22 @@
+.pay-btn {
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-flex;
+    flex-direction: row;
+    border: 1px solid rgb(69,69,69);
+    border-radius: 3px;
+    padding: 3px 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.pay-btn img {
+    height: 32px;
+    flex-shrink: 1;
+}
+
+.pay-btn > div {
+    line-height: 32px;
+    flex: 1;
+    padding: 0 10px;
+}

@@ -1,0 +1,7 @@
+.item-grid {
+    display: grid;
+    grid-gap: 10px;
+    justify-items: center;
+    grid-auto-rows: min-content;
+    grid-template-columns: repeat(3, 1fr);
+}
