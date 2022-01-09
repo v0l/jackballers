@@ -1,3 +1,4 @@
+using System.Globalization;
 using JackBallers.Api.Models;
 using JackBallers.Api.Strike;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,12 @@ namespace JackBallers.Api.Controllers;
 public class InvoiceController : ApiBaseController
 {
     private readonly IDatabase _database;
+    private readonly JackBallersConfig _config;
 
-    public InvoiceController(IDatabase database)
+    public InvoiceController(IDatabase database, JackBallersConfig config)
     {
         _database = database;
+        _config = config;
     }
 
     [HttpGet]
@@ -30,10 +33,11 @@ public class InvoiceController : ApiBaseController
             CorrelationId = invoiceId.ToString(),
             Amount = new()
             {
-                Currency = Currencies.USDT,
-                Amount = item.FiatPrice
+                Currency = _config.ReceiverCurrency ?? Currencies.USD,
+                Amount = Math.Round(item.FiatPrice, 2).ToString(CultureInfo.InvariantCulture)
             },
-            Description = $"{item?.Name} #{item?.Number}"
+            Description = $"{item?.Name} #{item?.Number}",
+            Handle = _config.ReceiverHandle
         };
         var invoice = await api.GenerateInvoice(invoiceRequest);
         var quote = await api.GetInvoiceQuote(invoice.InvoiceId);
@@ -45,7 +49,31 @@ public class InvoiceController : ApiBaseController
         };
         await itemInvoice.Save(_database);
 
-        
+        return Json(itemInvoice);
+    }
+
+    [Route("{invoiceId:guid}/wait")]
+    [HttpGet]
+    public async Task<IActionResult> WaitForPayment([FromServices] PartnerApi api, [FromRoute] Guid invoiceId)
+    {
+        var itemInvoice = await _database.GetJson<ItemInvoice>(ItemInvoice.FormatKey(invoiceId));
+        if (itemInvoice?.Invoice == default)
+        {
+            return NotFound();
+        }
+
+        while (!HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            var invoiceStatus = await api.GetInvoice(itemInvoice.Invoice.InvoiceId);
+            itemInvoice.Invoice = invoiceStatus;
+            await itemInvoice.Save(_database);
+            
+            if (invoiceStatus.State != InvoiceState.PAID)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
+        }
+
         return Json(itemInvoice);
     }
 }

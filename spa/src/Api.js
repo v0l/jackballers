@@ -11,6 +11,10 @@ export class Api {
         return await this.jsonGet(`/api/invoice?itemId=${item}`);
     }
     
+    async waitForInvoice(id) {
+        return await this.jsonGet(`/api/invoice/${id}/wait`);
+    }
+    
     async jsonGet(uri) {
         let req = await fetch(uri, {
             headers: {

@@ -1,5 +1,4 @@
-using System.Text.Json;
-using JackBallers.Api.Models;
+using System.Text.Json.Serialization;
 using JackBallers.Api.Strike;
 using StackExchange.Redis;
 
@@ -24,6 +23,9 @@ internal class Program
         var partnerConfig = builder.Configuration.GetSection("StrikeApi").Get<PartnerApiSettings>();
         builder.Services.AddSingleton(partnerConfig);
         builder.Services.AddTransient<PartnerApi>();
+
+        var config = builder.Configuration.GetSection("JackBallers").Get<JackBallersConfig>();
+        builder.Services.AddSingleton(config);
         
         var app = builder.Build();
 
@@ -49,5 +51,13 @@ internal class Program
 
 public class RedisConfig
 {
-    public string Connection { get; init; }
+    public string? Connection { get; init; }
+}
+
+public class JackBallersConfig
+{
+    public string? ReceiverHandle { get; init; }
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Currencies? ReceiverCurrency { get; init; }
 }

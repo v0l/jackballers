@@ -1,8 +1,7 @@
 using System.Net;
 using System.Text;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using Newtonsoft.Json.Converters;
 
 namespace JackBallers.Api.Strike;
 
@@ -45,7 +44,10 @@ public class PartnerApi
     {
         var request = new HttpRequestMessage(method, path);
         if (bodyObj != default)
-            request.Content = new StringContent(JsonConvert.SerializeObject(bodyObj), Encoding.UTF8, "application/json");
+        {
+            var reqJson = JsonConvert.SerializeObject(bodyObj);
+            request.Content = new StringContent(reqJson, Encoding.UTF8, "application/json");
+        }
 
         var rsp = await _client.SendAsync(request);
         var okResponse = method.Method switch
@@ -65,46 +67,45 @@ public class PartnerApi
 
 public class InvoiceQuote
 {
-    [JsonPropertyName("quoteId")]
+    [JsonProperty("quoteId")]
     public Guid QuoteId { get; init; }
     
-    [JsonPropertyName("description")]
+    [JsonProperty("description")]
     public string? Description { get; init; }
     
-    [JsonPropertyName("lnInvoice")]
+    [JsonProperty("lnInvoice")]
     public string? LnInvoice { get; init; }
     
-    [JsonPropertyName("onchainAddress")]
+    [JsonProperty("onchainAddress")]
     public string? OnChainAddress { get; init; }
     
-    [JsonPropertyName("expiration")]
+    [JsonProperty("expiration")]
     public DateTimeOffset Expiration { get; init; }
     
-    [JsonPropertyName("expirationInSec")]
+    [JsonProperty("expirationInSec")]
     public ulong ExpirationSec { get; init; }
     
-    [JsonPropertyName("targetAmount")]
+    [JsonProperty("targetAmount")]
     public CurrencyAmount? TargetAmount { get; init; }
     
-    [JsonPropertyName("sourceAmount")]
+    [JsonProperty("sourceAmount")]
     public CurrencyAmount? SourceAmount { get; init; }
     
-    [JsonPropertyName("conversionRate")]
+    [JsonProperty("conversionRate")]
     public ConversionRate? ConversionRate { get; init; }
 }
 
 public class ConversionRate
 {
-    [JsonPropertyName("amount")]
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-    public decimal Amount { get; init; }
+    [JsonProperty("amount")]
+    public string? Amount { get; init; }
     
-    [JsonPropertyName("sourceCurrency")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonProperty("sourceCurrency")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public Currencies Source { get; init; }
     
-    [JsonPropertyName("targetCurrency")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonProperty("targetCurrency")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public Currencies Target { get; init; }
 }
 
@@ -125,12 +126,11 @@ public class CreateInvoiceRequest
 
 public class CurrencyAmount
 {
-    [JsonPropertyName("amount")]
-    [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
-    public decimal Amount { get; init; }
+    [JsonProperty("amount")]
+    public string? Amount { get; init; }
 
-    [JsonPropertyName("currency")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonProperty("currency")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public Currencies? Currency { get; init; }
 }
 
@@ -145,32 +145,32 @@ public enum Currencies
 
 public class Invoice
 {
-    [JsonPropertyName("invoiceId")]
+    [JsonProperty("invoiceId")]
     public Guid InvoiceId { get; init; }
     
-    [JsonPropertyName("amount")]
+    [JsonProperty("amount")]
     public CurrencyAmount? Amount { get; init; }
 
-    [JsonPropertyName("state")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonProperty("state")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public InvoiceState State { get; init; }
 
-    [JsonPropertyName("created")]
+    [JsonProperty("created")]
     public DateTimeOffset? Created { get; init; }
     
-    [JsonPropertyName("correlationId")]
+    [JsonProperty("correlationId")]
     public string? CorrelationId { get; init; }
     
-    [JsonPropertyName("description")]
+    [JsonProperty("description")]
     public string? Description { get; init; }
     
-    [JsonPropertyName("issuerId")]
+    [JsonProperty("issuerId")]
     public string? IssuerId { get; init; }
     
-    [JsonPropertyName("receiverId")]
+    [JsonProperty("receiverId")]
     public string? ReceiverId { get; init; }
     
-    [JsonPropertyName("payerId")]
+    [JsonProperty("payerId")]
     public string? PayerId { get; init; }
 }
 

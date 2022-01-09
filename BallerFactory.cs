@@ -31,7 +31,7 @@ public class BallerFactory : BackgroundService
             {
                 Id = new Guid("0DFB74EC-BC09-4376-AC28-AC9AA09324CC"),
                 Name = "Young Baller",
-                Description = "Before the lust for destroying WesternUnion consumed him.",
+                Description = "Before the lust to destroy WesternUnion consumed him.",
                 Image = new Uri("https://s3.amazonaws.com/37assets/svn/1561-jackmallers.jpg")
             },
             new CollectionTemplate()

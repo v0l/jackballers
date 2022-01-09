@@ -26,7 +26,7 @@ export function Collection(props) {
           </div>
 
           <ItemGrid>
-              {items.map(a => <CollectionItem key={a.id} item={a}/>)}
+              {items.sort((a,b) => a.number - b.number).map(a => <CollectionItem key={a.id} item={a}/>)}
           </ItemGrid>
       </div>  
     );

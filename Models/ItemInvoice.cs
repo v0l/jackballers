@@ -15,7 +15,7 @@ public class ItemInvoice : RedisModel
     
     public Guid ItemId { get; init; }
     
-    public Invoice? Invoice { get; init; }
+    public Invoice? Invoice { get; set; }
     public InvoiceQuote Quote { get; init; }
 
     public static RedisKey FormatKey(Guid id)
