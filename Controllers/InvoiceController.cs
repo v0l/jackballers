@@ -2,6 +2,7 @@ using System.Globalization;
 using JackBallers.Api.Models;
 using JackBallers.Api.Strike;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace JackBallers.Api.Controllers;
@@ -9,13 +10,15 @@ namespace JackBallers.Api.Controllers;
 [Route("api/invoice")]
 public class InvoiceController : ApiBaseController
 {
+    private readonly ILogger<InvoiceController> _logger;
     private readonly IDatabase _database;
     private readonly JackBallersConfig _config;
 
-    public InvoiceController(IDatabase database, JackBallersConfig config)
+    public InvoiceController(IDatabase database, JackBallersConfig config, ILogger<InvoiceController> logger)
     {
         _database = database;
         _config = config;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -67,13 +70,31 @@ public class InvoiceController : ApiBaseController
             var invoiceStatus = await api.GetInvoice(itemInvoice.Invoice.InvoiceId);
             itemInvoice.Invoice = invoiceStatus;
             await itemInvoice.Save(_database);
+
+            //test
+            //invoiceStatus.State = InvoiceState.PAID;
             
-            if (invoiceStatus.State != InvoiceState.PAID)
+            if (invoiceStatus.State != InvoiceState.PAID
+                && itemInvoice.Quote?.Expiration > DateTimeOffset.UtcNow)
             {
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
+            else
+            {
+                break;
+            }
         }
 
-        return Json(itemInvoice);
+        if (itemInvoice.Invoice.State == InvoiceState.PAID)
+        {
+            //remove from collection
+            var item = await _database.GetJson<CollectionItem>(CollectionItem.FormatKey(itemInvoice.ItemId));
+            if (item != default)
+            {
+                _logger.LogInformation("Sold item '{name} #{number}'", item.Name, item.Number);
+                await _database.SetRemoveAsync(Collection.ItemsKey(item.CollectionId), item.Id.ToString());
+            }
+        }
+        return Content(JsonConvert.SerializeObject(itemInvoice), "application/json");
     }
 }

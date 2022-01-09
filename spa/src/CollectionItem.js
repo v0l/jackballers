@@ -1,8 +1,9 @@
 import "./CollectionItem.css"
-import {useEffect, useState} from "react";
+import {useEffect, useState, Fragment} from "react";
 import {PayWithStrike} from "./PayButton";
 import {Api} from "./Api";
 import QRCode from 'qrcode.react';
+import {Countdown} from "./Countdown";
 
 export function CollectionItem(props) {
     let [itemState, setItemState] = useState(ItemState.Buy);
@@ -26,12 +27,24 @@ export function CollectionItem(props) {
     }
     
     function renderPaid() {
-        
+        return (
+            <div className="paid">
+                <h3>Congrats!</h3>
+                <p>
+                    You are now the proud owner of {props.item.name} #{props.item.number}!
+                </p>
+                <p>
+                    Download your unique NFT <a href={props.item.image} className="txt-yellow">here</a>
+                </p>
+                <small>All funds will be dontated to <a href={"https://hrf.org"} target={"_blank"} className="txt-yellow">HRF</a></small>
+            </div>
+        )
     }
     
     function renderResource() {
         
         switch(itemState) {
+            case ItemState.Expired:
             case ItemState.Buy: {
                 return <img alt="item-resource" className="nft" src={props.item.image}/>;
             }
@@ -47,6 +60,29 @@ export function CollectionItem(props) {
         }
     }
     
+    function renderActions() {
+        switch(itemState) {
+            case ItemState.Expired:
+            case ItemState.Buy: {
+                return (
+                    <Fragment>
+                        <div>$ {props.item.fiatPrice.toFixed(2).toLocaleString()}</div>
+                        <PayWithStrike onClick={handlePay}/>
+                    </Fragment>
+                );
+            }
+            case ItemState.Pay: {
+                return (
+                    <Fragment>
+                        <Countdown to={invoice.quote.expiration} onEnd={() => setItemState(ItemState.Expired)}/>
+                        {(parseFloat(invoice.quote.sourceAmount.amount) * 1.0e8).toLocaleString()} SATS
+                    </Fragment>
+                );
+            }
+        }
+        return null;
+    }
+    
     useEffect(() => {
         if(itemState === ItemState.Pay) {
             checkPaymentStatus();
@@ -60,8 +96,7 @@ export function CollectionItem(props) {
                 {renderResource()}
             </div>
             <div className="buy">
-                <div>$ {props.item.fiatPrice.toFixed(2).toLocaleString()}</div>
-                <PayWithStrike onClick={handlePay}/>
+                {renderActions()}
             </div>
         </div>
     );
@@ -70,5 +105,6 @@ export function CollectionItem(props) {
 const ItemState = {
     Buy: 1,
     Pay: 2,
-    SaveJpg: 3
+    SaveJpg: 3,
+    Expired: 4
 };

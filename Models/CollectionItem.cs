@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace JackBallers.Api.Models;
@@ -8,6 +9,9 @@ public class CollectionItem : RedisModel
     [JsonPropertyName("id")]
     public Guid Id { get; init; } = Guid.NewGuid();
 
+    [JsonProperty("collectionId")]
+    public Guid CollectionId { get; init; }
+    
     [JsonPropertyName("name")]
     public string? Name { get; init; }
     

@@ -17,3 +17,7 @@ code {
 .txt-yellow {
     color: rgb(204, 255, 0);
 }
+
+.txt-center {
+    text-align: center;
+}

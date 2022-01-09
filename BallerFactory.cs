@@ -16,7 +16,7 @@ public class BallerFactory : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        const int targetAmount = 5;
+        const int targetAmount = 6;
         
         var ballerTemplates = new[]
         {

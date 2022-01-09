@@ -153,7 +153,7 @@ public class Invoice
 
     [JsonProperty("state")]
     [JsonConverter(typeof(StringEnumConverter))]
-    public InvoiceState State { get; init; }
+    public InvoiceState State { get; set; }
 
     [JsonProperty("created")]
     public DateTimeOffset? Created { get; init; }
