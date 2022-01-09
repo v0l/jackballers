@@ -27,7 +27,7 @@ public class CollectionTemplate
             Description = Description,
             Image = Image,
             Number = rank,
-            FiatPrice = 0.5m + (10.0m * (decimal)new Random().NextDouble()),
+            FiatPrice = 0.5m + (3.0m * (decimal)new Random().NextDouble()),
             CollectionId = Id
         };
     }
