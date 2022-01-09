@@ -36,12 +36,12 @@ export function CollectionItem(props) {
     
     return (
         <div className="item">
-            <div className="title">{props.item.description.name} #{props.item.rank}</div>
+            <div className="title">{props.item.name} #{props.item.number}</div>
             <div className="resource">
                 {renderResource()}
             </div>
             <div className="buy">
-                <div>$ {props.item.fiatPrice.toLocaleString()}</div>
+                <div>$ {props.item.fiatPrice.toFixed(2).toLocaleString()}</div>
                 <PayWithStrike onClick={handlePay}/>
             </div>
         </div>

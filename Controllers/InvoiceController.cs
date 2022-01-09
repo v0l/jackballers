@@ -16,9 +16,9 @@ public class InvoiceController : ApiBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetInvoiceForItem([FromServices]PartnerApi api, Guid id)
+    public async Task<IActionResult> GetInvoiceForItem([FromServices]PartnerApi api, [FromQuery]Guid itemId)
     {
-        var item = await _database.GetJson<CollectionItem>(CollectionItem.FormatKey(id));
+        var item = await _database.GetJson<CollectionItem>(CollectionItem.FormatKey(itemId));
         if (item == default)
         {
             return NotFound();
@@ -30,21 +30,22 @@ public class InvoiceController : ApiBaseController
             CorrelationId = invoiceId.ToString(),
             Amount = new()
             {
-                Currency = Currencies.USD,
+                Currency = Currencies.USDT,
                 Amount = item.FiatPrice
             },
-            Description = item?.Name
+            Description = $"{item?.Name} #{item?.Number}"
         };
         var invoice = await api.GenerateInvoice(invoiceRequest);
         var quote = await api.GetInvoiceQuote(invoice.InvoiceId);
         
-        var itemInvoice = new ItemInvoice(invoiceId, id)
+        var itemInvoice = new ItemInvoice(invoiceId, itemId)
         {
             Invoice = invoice,
             Quote = quote
         };
         await itemInvoice.Save(_database);
 
+        
         return Json(itemInvoice);
     }
 }

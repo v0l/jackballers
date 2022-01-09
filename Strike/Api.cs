@@ -1,7 +1,8 @@
 using System.Net;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace JackBallers.Api.Strike;
 
@@ -44,20 +45,21 @@ public class PartnerApi
     {
         var request = new HttpRequestMessage(method, path);
         if (bodyObj != default)
-            request.Content = new StringContent(JsonSerializer.Serialize(bodyObj), Encoding.UTF8, "application/json");
+            request.Content = new StringContent(JsonConvert.SerializeObject(bodyObj), Encoding.UTF8, "application/json");
 
         var rsp = await _client.SendAsync(request);
         var okResponse = method.Method switch
         {
-            "POST" => HttpStatusCode.Accepted,
+            "POST" => HttpStatusCode.Created,
             _ => HttpStatusCode.OK
         };
 
-        if (rsp.StatusCode != okResponse) throw new ErrorResponse();
-        var inv = JsonSerializer.Deserialize<TReturn>(await rsp.Content.ReadAsStreamAsync());
+        var json = await rsp.Content.ReadAsStringAsync();
+        if (rsp.StatusCode != okResponse) throw new ErrorResponse($"Response invalid: {json}");
+        var inv = JsonConvert.DeserializeObject<TReturn>(json);
         if (inv != default) return inv;
 
-        throw new ErrorResponse();
+        throw new ErrorResponse("Invalid response");
     }
 }
 
@@ -98,16 +100,19 @@ public class ConversionRate
     public decimal Amount { get; init; }
     
     [JsonPropertyName("sourceCurrency")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
     public Currencies Source { get; init; }
     
     [JsonPropertyName("targetCurrency")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
     public Currencies Target { get; init; }
 }
 
 public class ErrorResponse : Exception
 {
+    public ErrorResponse(string message) : base(message)
+    {
+    }
 }
 
 public class CreateInvoiceRequest
@@ -125,7 +130,7 @@ public class CurrencyAmount
     public decimal Amount { get; init; }
 
     [JsonPropertyName("currency")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
     public Currencies? Currency { get; init; }
 }
 
@@ -147,7 +152,7 @@ public class Invoice
     public CurrencyAmount? Amount { get; init; }
 
     [JsonPropertyName("state")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
     public InvoiceState State { get; init; }
 
     [JsonPropertyName("created")]

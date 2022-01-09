@@ -1,0 +1,19 @@
+.collection {
+    
+}
+
+.collection .header {
+    padding: 20px 0;
+    display: flex;
+    line-height: 24px;
+}
+
+.collection .header .title {
+    font-size: 24px;
+    flex-grow: 1;
+    color: rgb(204, 255, 0);
+}
+
+.collection .header .description {
+    flex-shrink: 1;
+}

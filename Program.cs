@@ -15,7 +15,8 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddRouting();
-
+        builder.Services.AddHostedService<BallerFactory>();
+        
         var redis = builder.Configuration.GetSection("Redis").Get<RedisConfig>();
         var cx = await ConnectionMultiplexer.ConnectAsync(redis.Connection);
         builder.Services.AddSingleton(cx.GetDatabase());
@@ -25,12 +26,6 @@ internal class Program
         builder.Services.AddTransient<PartnerApi>();
         
         var app = builder.Build();
-
-        if (args.Length > 0)
-        {
-            await handleArgs(app.Logger, cx.GetDatabase(), args);
-            return;
-        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -49,33 +44,6 @@ internal class Program
             ep.MapFallbackToFile("index.html");
         });
         await app.RunAsync();
-    }
-
-    private static async Task handleArgs(ILogger log, IDatabase db, string[] args)
-    {
-        switch (args[0])
-        {
-            case "add":
-            {
-                switch (args[1])
-                {
-                    case "collection":
-                    {
-                        var obj = JsonSerializer.Deserialize<Collection>(args[2]);
-                        await obj!.Save(db);
-                        break;
-                    }
-                    case "artist":
-                    {
-                        var obj = JsonSerializer.Deserialize<Artist>(args[2]);
-                        await obj!.Save(db);
-                        break;
-                    }
-                }
-
-                break;
-            }
-        }
     }
 }
 

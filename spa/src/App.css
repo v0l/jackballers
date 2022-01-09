@@ -4,3 +4,30 @@
     margin-right: auto;
     min-height: 20px;
 }
+
+.app .header {
+    
+}
+
+.app .header > div.title {
+    display: inline-block;
+    font-size: 24px;
+    padding: 20px 40px;
+    border-right: 1px solid;
+}
+
+.app .header .links {
+    display: inline-flex;
+}
+
+.app .header .links > div {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+} 
+
+.app .header .links > div.active {
+    color: rgb(204, 255, 0);
+}

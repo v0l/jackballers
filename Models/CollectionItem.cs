@@ -1,21 +1,30 @@
+using System.Text.Json.Serialization;
 using StackExchange.Redis;
 
 namespace JackBallers.Api.Models;
 
 public class CollectionItem : RedisModel
 {
-    public Guid Id { get; init; }
+    [JsonPropertyName("id")]
+    public Guid Id { get; init; } = Guid.NewGuid();
 
+    [JsonPropertyName("name")]
     public string? Name { get; init; }
+    
+    [JsonPropertyName("description")]
     public string? Description { get; init; }
 
+    [JsonPropertyName("image")]
     public Uri? Image { get; init; }
 
-    public uint Rank { get; init; } = 0;
+    [JsonPropertyName("number")]
+    public ulong Number { get; init; } = 0;
+    
+    [JsonPropertyName("fiatPrice")]
+    public decimal FiatPrice { get; init; } = 1.0m;
 
     public override RedisKey FormatKey() => FormatKey(Id);
     
     public static RedisKey FormatKey(Guid id) => $"item:{id}";
 
-    public decimal FiatPrice => Rank < 10 ? 5.0m : 1.0m;
 }
