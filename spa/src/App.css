@@ -31,3 +31,8 @@
 .app .header .links > div.active {
     color: rgb(204, 255, 0);
 }
+
+.app .footer {
+    font-size: 10px;
+    color: #aaa;
+}

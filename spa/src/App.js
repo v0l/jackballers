@@ -26,6 +26,12 @@ function App() {
             </div>
 
             {collections.map(a => <Collection data={a} key={a.id}/>)}
+            <div className="footer">
+                <small>
+                    This site is not affilated with <a href="https://strike.me" className="txt-yellow">Strike</a> or <a href="https://twitter.com/JackMallers" className="txt-yellow">Jack Mallers</a>. 
+                    This is a parody site, all funds will be donated to <a href="https://hrf.org/" className="txt-yellow">HRF</a>.
+                </small>
+            </div>
         </div>
     );
 }
